@@ -1,6 +1,5 @@
 package com.spicymango.fanfictionreader.util.adapters;
 
-import java.util.List;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -19,6 +18,8 @@ import android.widget.TextView.BufferType;
 
 import com.spicymango.fanfictionreader.R;
 import com.spicymango.fanfictionreader.Settings;
+
+import java.util.List;
 
 /**
  * An adapter optimized for displaying long amounts of text efficiently
@@ -48,6 +49,7 @@ public class TextAdapter extends ArrayAdapter<Spanned> {
 			LayoutInflater inflater = ((Activity) getContext()).getLayoutInflater();
 			view = (TextView) inflater.inflate(R.layout.read_story_list_item, parent, false);
 			view.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+			view.setLineSpacing(0, 1.2f); // LATER: make is user-configurable
 			view.setTypeface(tp);
 			view.setMovementMethod(MovementLinker.getInstance());
 		} else {
