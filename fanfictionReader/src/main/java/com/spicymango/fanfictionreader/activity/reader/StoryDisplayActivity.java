@@ -626,8 +626,8 @@ public class StoryDisplayActivity extends AppCompatActivity implements LoaderCal
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
+	protected void onResume() {
+		super.onResume();
 		final int visibility = getWindow().getDecorView().getSystemUiVisibility();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 			int newVisibility = visibility
