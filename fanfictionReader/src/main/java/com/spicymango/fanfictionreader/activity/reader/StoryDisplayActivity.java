@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.AsyncQueryHandler;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -56,7 +58,6 @@ import com.spicymango.fanfictionreader.util.Sites;
 import com.spicymango.fanfictionreader.util.adapters.TextAdapter;
 
 import org.jsoup.Connection.Method;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -363,6 +364,23 @@ public class StoryDisplayActivity extends AppCompatActivity implements LoaderCal
 			return true;
 		case R.id.read_story_go_to_bottom:
 			mListView.setSelection(mListView.getCount() - 1);
+			return true;
+		case R.id.show_story_url:
+			final String storyUrl = Sites.FANFICTION.DESKTOP_URI.buildUpon()
+					.appendPath("s")
+					.appendPath(Long.toString(mStoryId))
+					.appendPath("") // show trailing slash, clearly indicate end of storyId
+					.build()
+					.toString();
+			AlertDialog.Builder adBuilder = new AlertDialog.Builder(this)
+					.setMessage(storyUrl)
+					.setPositiveButton("Ok", null) // i18N
+					.setNegativeButton("Copy", (dialog, which) -> {
+						ClipboardManager clipboardManager = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+						clipboardManager.setPrimaryClip(ClipData.newPlainText(storyUrl, storyUrl));
+						Toast.makeText(this, storyUrl + " copied", Toast.LENGTH_SHORT).show();
+					});
+			adBuilder.show();
 			return true;
 		case R.id.review:
 			ReviewDialog.review(this, mStoryId, mCurrentPage);
