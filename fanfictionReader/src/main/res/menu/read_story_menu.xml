@@ -24,7 +24,11 @@
         android:title="@string/menu_button_settings"
         spicymango:showAsAction="ifRoom">
     </item>
-
+    <item
+        android:id="@+id/show_story_url"
+        android:title="Show Story URL"
+        spicymango:showAsAction="never"
+        /> <!-- i18N -->
     <group
         android:id="@+id/go_to_group"
         android:enabled="false"
