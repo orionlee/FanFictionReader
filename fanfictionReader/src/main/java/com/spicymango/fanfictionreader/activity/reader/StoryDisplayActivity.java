@@ -56,7 +56,6 @@ import com.spicymango.fanfictionreader.util.Sites;
 import com.spicymango.fanfictionreader.util.adapters.TextAdapter;
 
 import org.jsoup.Connection.Method;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -578,6 +577,7 @@ public class StoryDisplayActivity extends AppCompatActivity implements LoaderCal
 		}
 
         // gesture detection on story text view
+/*// TODO: disable it for now
 		mListView.setOnTouchListener(new BottomHorizontalSwipeListener(mListView) {
 			private static final boolean SCROLL_DOWN = true;
 			@Override
@@ -589,6 +589,23 @@ public class StoryDisplayActivity extends AppCompatActivity implements LoaderCal
 			@Override
 			public void onSwipeRightAtViewBottom() {
 				scrollStoryByPage(!SCROLL_DOWN);
+			}
+		});
+*/
+
+		// Note: The single tap listener does not really work, because the single taps
+		// events on the mListView are somehow not passed to the onTouchListener.
+		mListView.setOnTouchListener(new SpecialAreaSingleTapListener(mListView) {
+			private static final boolean SCROLL_DOWN = true;
+
+			@Override
+			public boolean onSingleTapUpAtSpecialArea(@NonNull Area area) {
+				if (area == Area.BOTTOM_CORNER_RIGHT || area == Area.BOTTOM_CORNER_LEFT) {
+					scrollStoryByPage(SCROLL_DOWN);
+					return true;
+				}
+				// else not supported area
+				return false;
 			}
 		});
 
@@ -822,6 +839,64 @@ public class StoryDisplayActivity extends AppCompatActivity implements LoaderCal
 														   SqlConstants.KEY_STORY_ID + " = ?",
 														   new String[] {Long.toString(storyId)}, null);
 		}
+	}
+
+	private static abstract class SpecialAreaSingleTapListener implements View.OnTouchListener {
+		private static final String TAG = "FFR-SAreaSTap";
+
+		private static final boolean DEBUG_TOUCHES = true && BuildConfig.DEBUG;
+
+		static enum Area {
+			BOTTOM_CORNER_LEFT, BOTTOM_CORNER_RIGHT
+		}
+
+		// Given the listener should have a life cycle within the parent view
+		// Holding a reference to the view should not cause memory leak.
+		@NonNull
+		final View mParentView; // package scope to be used by inner class
+
+		@NonNull
+		private final FixedGestureDetectorCompat mDetector;
+
+
+		public SpecialAreaSingleTapListener(@NonNull View parentView) {
+			mParentView = parentView;
+			mDetector = new FixedGestureDetectorCompat(parentView.getContext(),
+					new GestureDetector.SimpleOnGestureListener() {
+						final float mOneInchInPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN,
+								1, parentView.getContext().getResources().getDisplayMetrics());
+
+						@Override
+						public boolean onSingleTapUp(MotionEvent e) {
+							if (DEBUG_TOUCHES) { Log.v(TAG, "onSingleTapUp - parent{X,Y}: " +
+									mParentView.getWidth() + "," + mParentView.getHeight() +
+									", e: " + e); }
+							Area area = null;
+							// check if the tap is at bottom
+							if (mParentView.getHeight() - e.getY() < mOneInchInPx) {
+								if (e.getX() < mOneInchInPx) {
+									area = Area.BOTTOM_CORNER_LEFT;
+								} else if (mParentView.getWidth() - e.getX() < mOneInchInPx) {
+									area = Area.BOTTOM_CORNER_RIGHT;
+								} // else bottom area middle: not supported yet
+							} // else not at the bottom: not supported yet
+
+							if (area != null) {
+								return onSingleTapUpAtSpecialArea(area);
+							} else {
+								return super.onSingleTapUp(e);
+							}
+						}
+					});
+		}
+
+		@Override
+		public boolean onTouch(View view, MotionEvent event) {
+			if (DEBUG_TOUCHES) { Log.v(TAG, "onTouch - e: " + event); }
+			return mDetector.onTouchEvent(event);
+		}
+
+		public abstract boolean onSingleTapUpAtSpecialArea(@NonNull Area area);
 	}
 
 	/**
