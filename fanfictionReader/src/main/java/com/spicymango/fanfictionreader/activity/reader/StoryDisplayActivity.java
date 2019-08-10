@@ -56,7 +56,6 @@ import com.spicymango.fanfictionreader.util.Sites;
 import com.spicymango.fanfictionreader.util.adapters.TextAdapter;
 
 import org.jsoup.Connection.Method;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -152,14 +151,16 @@ public class StoryDisplayActivity extends AppCompatActivity implements LoaderCal
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		final int stepSize = 100;
+//		final int stepSize = 100;
 
 		if (Settings.volumeButtonsScrollStory(this)) {
 			if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
-				mListView.smoothScrollBy(stepSize, 100);
+				scrollStoryByPage(PGDN);
+//				mListView.smoothScrollBy(stepSize, 100);
 				return true;
 			} else if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP)) {
-				mListView.smoothScrollBy(-stepSize, 100);
+				scrollStoryByPage(PGUP);
+//				mListView.smoothScrollBy(-stepSize, 100);
 				return true;
 			}
 		}
